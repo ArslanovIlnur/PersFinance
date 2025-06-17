@@ -18,23 +18,29 @@ public class TransactionServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var context = req.getServletContext();
 
-        int freeMoney = (int)context.getAttribute("freeMoney");
-        var expenses = new ArrayList<Transaction>((List)context.getAttribute("expenses"));
-        for(String k : req.getParameterMap().keySet()) {
-                int value = Integer.parseInt(req.getParameter(k));
-                if(k.equals("bank")){ //при вводе "bank=" в URL выполняется пополнение
-                    freeMoney += value;
-                    req.setAttribute("freeMoney", freeMoney);
-                    expenses.add(new Transaction(k, value));
-                } else {
-                    freeMoney -= value;
-                    expenses.add(new Transaction(k, value));
+        int freeMoney = (int) context.getAttribute("freeMoney");
+        var expenses = new ArrayList<Transaction>((List) context.getAttribute("expenses"));
+
+        for (String k : req.getParameterMap().keySet()) {
+            int value = Integer.parseInt(req.getParameter(k));
+            if (k.equals("bank")) { // при вводе "bank=" в URL выполняется пополнение
+                freeMoney += value;
+                req.setAttribute("freeMoney", freeMoney);
+                expenses.add(new Transaction(k, value));
+            } else {
+                // Проверка, чтобы freeMoney не стал меньше 0
+                if (freeMoney - value < 0) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not enough money to cover expenses");
+                    return;
                 }
+                freeMoney -= value;
+                expenses.add(new Transaction(k, value));
+            }
         }
 
         context.setAttribute("expenses", expenses);
         context.setAttribute("freeMoney", freeMoney);
-        resp.getWriter().println("Expenses were added");
         resp.sendRedirect("/summary");
     }
 }
+
