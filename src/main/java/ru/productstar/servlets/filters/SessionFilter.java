@@ -16,7 +16,7 @@ public class SessionFilter implements Filter {
         var session = httpRequest.getSession(false);
 
         // Пропускаем запросы к страницам входа и регистрации
-        if (requestURI.equals("/login") || requestURI.equals("/register")) {
+        if (requestURI.equals("/login") || requestURI.equals("/register") || requestURI.equals("/")) {
             chain.doFilter(request, response);
             return;
         }
