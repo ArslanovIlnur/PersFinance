@@ -8,4 +8,5 @@ services:
     - ./:/app
   working_dir: /app
   command: mvn jetty:run
-  ports: "9000:9000"
+  ports: 
+   - "9000:9000"
